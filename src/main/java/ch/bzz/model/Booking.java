@@ -1,5 +1,6 @@
 package ch.bzz.model;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,12 +12,32 @@ import java.util.Date;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "bookings")
+@Entity
 public class Booking {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "date", nullable = false)
     private Date date;
+
+    @Column(name = "text", nullable = false)
     private String text;
-    private String debitAccount;
-    private String creditAccount;
+
+    @ManyToOne
+    @JoinColumn(name = "id", nullable = false)
+    private Account debitAccount;
+
+    @ManyToOne
+    @JoinColumn(name = "id", nullable = false)
+    private Account creditAccount;
+
+    @Column(name = "amount", nullable = false)
     private double amount;
-    private String project;
+
+    @ManyToOne
+    @JoinColumn(name = "projectName", nullable = false)
+    private Project project;
 }
