@@ -15,15 +15,15 @@ import java.util.List;
 
 @Slf4j
 @RestController
-public class    ProjectApiController implements ProjectApi {
+public class ProjectApiController implements ProjectApi {
 
     private final ProjectRepository projectRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final JwtUtil jwtUtil;
 
-    public ProjectApiController(ProjectRepository projectRepository) {
+    public ProjectApiController(ProjectRepository projectRepository, JwtUtil jwtUtil) {
         this.projectRepository = projectRepository;
-        this.jwtUtil = new JwtUtil();
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
