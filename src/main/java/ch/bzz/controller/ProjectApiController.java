@@ -13,14 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-public class ProjectApiController implements ProjectApi {
+public class    ProjectApiController implements ProjectApi {
 
     private final ProjectRepository projectRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    private final JwtUtil jwtUtil = new JwtUtil();
+    private final JwtUtil jwtUtil;
 
     public ProjectApiController(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
+        this.jwtUtil = new JwtUtil();
     }
 
     @Override
