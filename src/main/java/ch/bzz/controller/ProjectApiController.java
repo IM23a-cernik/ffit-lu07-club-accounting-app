@@ -30,7 +30,7 @@ public class    ProjectApiController implements ProjectApi {
     public ResponseEntity<Void> createProject(LoginRequest loginRequest) {
         String projectName = loginRequest.getProjectName();
         if (!projectRepository.findByProjectName(projectName).isEmpty()) {
-            log.info("Project with name {} already exists", projectName);
+            log.error("Project with name {} already exists", projectName);
             return ResponseEntity.status(409).build();
         }
         String hashedPassword = encoder.encode(loginRequest.getPassword());
