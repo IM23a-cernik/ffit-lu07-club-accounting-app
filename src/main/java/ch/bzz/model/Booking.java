@@ -27,11 +27,11 @@ public class Booking {
     private String text;
 
     @ManyToOne
-    @JoinColumn(name = "id", nullable = false)
+    @JoinColumn(name = "debit_id", nullable = false)
     private Account debitAccount;
 
     @ManyToOne
-    @JoinColumn(name = "id", nullable = false)
+    @JoinColumn(name = "credit_id", nullable = false)
     private Account creditAccount;
 
     @Column(name = "amount", nullable = false)
