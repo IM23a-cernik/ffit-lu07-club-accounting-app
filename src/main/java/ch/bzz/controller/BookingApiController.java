@@ -44,11 +44,13 @@ public class BookingApiController implements BookingApi {
             String projectName = jwtUtil.getProject(token);
             Project project = em.getReference(Project.class, projectName);
             if (project == null) {
+                log.error("Project not found");
                 return ResponseEntity.status(404).build();
             }
 
             List<ch.bzz.model.Booking> dbBookings = bookingRepository.findByProject(project);
             if (dbBookings.isEmpty()) {
+                log.error("Booking not found");
                 return ResponseEntity.status(404).build();
             }
             List<Booking> apiBookings = dbBookings.stream().map(db -> {
@@ -62,6 +64,7 @@ public class BookingApiController implements BookingApi {
             }).toList();
             return ResponseEntity.ok(apiBookings);
         }
+        log.error("Authorization header not found");
         return ResponseEntity.status(401).build();
     }
 

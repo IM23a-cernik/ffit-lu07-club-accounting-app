@@ -45,11 +45,13 @@ public class AccountApiController implements AccountApi {
             String projectName = jwtUtil.getProject(token);
             Project project = em.getReference(Project.class, projectName);
             if (project == null) {
+                log.error("Project not found");
                 return ResponseEntity.status(404).build();
             }
 
             List<ch.bzz.model.Account> dbAccounts = accountRepository.findByProject(project);
             if (dbAccounts.isEmpty()) {
+                log.error("Account not found");
                 return ResponseEntity.status(404).build();
             }
 
@@ -61,6 +63,7 @@ public class AccountApiController implements AccountApi {
             }).toList();
             return ResponseEntity.ok(apiAccounts);
         }
+        log.error("Authorization header not found");
         return ResponseEntity.status(401).build();
     }
 
