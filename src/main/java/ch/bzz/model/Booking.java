@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Setter
 @Getter
@@ -21,7 +21,7 @@ public class Booking {
     private int id;
 
     @Column(name = "date", nullable = false)
-    private Date date;
+    private LocalDate date;
 
     @Column(name = "text", nullable = false)
     private String text;
@@ -35,7 +35,7 @@ public class Booking {
     private Account creditAccount;
 
     @Column(name = "amount", nullable = false)
-    private double amount;
+    private float amount;
 
     @ManyToOne
     @JoinColumn(name = "projectName", nullable = false)
