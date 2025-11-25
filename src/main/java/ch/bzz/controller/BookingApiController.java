@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -50,8 +51,15 @@ public class BookingApiController implements BookingApi {
 
             List<ch.bzz.model.Booking> dbBookings = bookingRepository.findByProject(project);
             if (dbBookings.isEmpty()) {
-                log.error("Booking not found");
-                return ResponseEntity.status(404).build();
+                log.warn("Booking not found");
+                Booking dummyBooking = new Booking();
+                dummyBooking.setNumber(1);
+                dummyBooking.setDate(LocalDate.now());
+                dummyBooking.setText("Dummy Booking");
+                dummyBooking.setAmount(0.0F);
+                dummyBooking.setDebit(1);
+                dummyBooking.setCredit(1);
+                return ResponseEntity.ok(List.of(dummyBooking));
             }
             List<Booking> apiBookings = dbBookings.stream().map(db -> {
                 Booking booking = new Booking();
