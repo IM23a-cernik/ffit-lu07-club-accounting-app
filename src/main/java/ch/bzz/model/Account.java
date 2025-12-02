@@ -13,12 +13,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "accounts")
 public class Account {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @Column(name = "accountNumber", nullable = false)
+    @Column(unique = true, name = "accountNumber", nullable = false)
     private int accountNumber;
 
     @Column(name = "name", nullable = false)
