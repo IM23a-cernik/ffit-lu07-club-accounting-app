@@ -29,7 +29,7 @@ public class ProjectApiController implements ProjectApi {
     @Override
     public ResponseEntity<Void> createProject(LoginRequest loginRequest) {
         String projectName = loginRequest.getProjectName();
-        if (!projectRepository.findByProjectName(projectName).isEmpty()) {
+        if (projectRepository.findByProjectName(projectName).equals(loginRequest.getProjectName())) {
             log.error("Project with name {} already exists", projectName);
             return ResponseEntity.status(409).build();
         }
@@ -42,7 +42,7 @@ public class ProjectApiController implements ProjectApi {
 
     @Override
     public ResponseEntity<LoginProject200Response> loginProject(LoginRequest loginRequest) {
-        Project project = projectRepository.findByProjectName(loginRequest.getProjectName()).get(0);
+        Project project = projectRepository.findByProjectName(loginRequest.getProjectName());
         if (project != null && encoder.matches(loginRequest.getPassword(), project.getPasswordHash())) {
             String token = jwtUtil.generateToken(loginRequest.getProjectName());
             LoginProject200Response response = new LoginProject200Response();

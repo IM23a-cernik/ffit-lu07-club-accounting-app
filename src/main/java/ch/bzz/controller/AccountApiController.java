@@ -2,19 +2,19 @@ package ch.bzz.controller;
 
 import ch.bzz.generated.api.AccountApi;
 import ch.bzz.generated.model.Account;
+import ch.bzz.generated.model.AccountUpdate;
 import ch.bzz.generated.model.UpdateAccountsRequest;
 import ch.bzz.model.Project;
 import ch.bzz.repository.AccountRepository;
 import ch.bzz.repository.ProjectRepository;
 import ch.bzz.util.JwtUtil;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -27,14 +27,12 @@ public class AccountApiController implements AccountApi {
     private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final JwtUtil jwtUtil;
-    private final EntityManager em;
 
     @Autowired
-    public AccountApiController(AccountRepository accountRepository, ProjectRepository projectRepository, JwtUtil jwtUtil, EntityManager em) {
+    public AccountApiController(AccountRepository accountRepository, ProjectRepository projectRepository, JwtUtil jwtUtil) {
         this.accountRepository = accountRepository;
         this.projectRepository = projectRepository;
         this.jwtUtil = jwtUtil;
-        this.em = em;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class AccountApiController implements AccountApi {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             String projectName = jwtUtil.getProject(token);
-            Project project = em.getReference(Project.class, projectName);
+            Project project = projectRepository.findByProjectName(projectName);
             if (project == null) {
                 log.error("Project not found");
                 return ResponseEntity.status(404).build();
@@ -71,7 +69,52 @@ public class AccountApiController implements AccountApi {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Void> updateAccounts(UpdateAccountsRequest updateAccountsRequest) {
-        return null;
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String projectName = jwtUtil.getProject(token);
+            Project project = projectRepository.findByProjectName(projectName);
+            if (project == null) {
+                log.error("Project not found");
+                return ResponseEntity.status(404).build();
+            }
+
+            List<ch.bzz.model.Account> dbAccounts = accountRepository.findByProject(project);
+            List<AccountUpdate> updateAccounts = updateAccountsRequest.getAccounts();
+
+            for (AccountUpdate updateAccount : updateAccounts) {
+                ch.bzz.model.Account match = dbAccounts.stream()
+                        .filter(account -> account.getAccountNumber() == updateAccount.getNumber())
+                        .findFirst().orElse(null);
+                if (match == null) {
+                    ch.bzz.model.Account newAccount = new ch.bzz.model.Account();
+                    newAccount.setAccountNumber(updateAccount.getNumber());
+                    newAccount.setName(updateAccount.getName().orElse(null));
+                    newAccount.setProject(project);
+                    accountRepository.save(newAccount);
+                    log.info("Account created");
+                } else {
+                    match.setAccountNumber(updateAccount.getNumber());
+                    match.setName(updateAccount.getName().orElse(null));
+                    accountRepository.save(match);
+                    log.info("Account updated");
+                }
+            }
+
+            for (ch.bzz.model.Account dbAccount : dbAccounts) {
+                boolean exists = updateAccounts.stream()
+                        .anyMatch(api -> api.getNumber() == dbAccount.getAccountNumber());
+
+                if (!exists) {
+                    accountRepository.delete(dbAccount);
+                    log.info("Account deleted: " + dbAccount.getAccountNumber());
+                }
+            }
+
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(401).build();
     }
 }
