@@ -51,7 +51,7 @@ public class AccountApiController implements AccountApi {
             if (dbAccounts.isEmpty()) {
                 log.warn("Account not found");
                 Account dummyAccount = new Account();
-                dummyAccount.setNumber(2000);
+                dummyAccount.setNumber(1100);
                 dummyAccount.setName("FLL");
                 return ResponseEntity.ok(List.of(dummyAccount));
             }
