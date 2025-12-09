@@ -88,6 +88,15 @@ public class AccountApiController implements AccountApi {
                 ch.bzz.model.Account match = dbAccounts.stream()
                         .filter(account -> account.getAccountNumber() == updateAccount.getNumber())
                         .findFirst().orElse(null);
+
+                if (updateAccount.getName() == null) {
+                    if (match != null) {
+                        accountRepository.delete(match);
+                        log.info("Account deleted: " + match.getAccountNumber());
+                    }
+                    continue;
+                }
+
                 if (match == null) {
                     ch.bzz.model.Account newAccount = new ch.bzz.model.Account();
                     newAccount.setAccountNumber(updateAccount.getNumber());
@@ -100,16 +109,6 @@ public class AccountApiController implements AccountApi {
                     match.setName(updateAccount.getName().orElse(null));
                     accountRepository.save(match);
                     log.info("Account updated");
-                }
-            }
-
-            for (ch.bzz.model.Account dbAccount : dbAccounts) {
-                boolean exists = updateAccounts.stream()
-                        .anyMatch(api -> api.getNumber() == dbAccount.getAccountNumber());
-
-                if (!exists) {
-                    accountRepository.delete(dbAccount);
-                    log.info("Account deleted: " + dbAccount.getAccountNumber());
                 }
             }
 

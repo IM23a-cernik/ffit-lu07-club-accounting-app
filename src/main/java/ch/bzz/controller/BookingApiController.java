@@ -105,6 +105,14 @@ public class BookingApiController implements BookingApi {
                 Account creditAccount = accountRepository.findByAccountNumber(updateBooking.getCredit().orElse(null));
                 Account debitAccount = accountRepository.findByAccountNumber(updateBooking.getDebit().orElse(null));
 
+                if (updateBooking.getAmount().orElse(null) == null) {
+                    if (match != null) {
+                        bookingRepository.delete(match);
+                        log.info("Booking deleted: " + match.getId());
+                    }
+                    continue;
+                }
+
                 if (match == null) {
                     ch.bzz.model.Booking newBooking = new ch.bzz.model.Booking();
                     newBooking.setDate(updateBooking.getDate().orElse(null));
@@ -126,16 +134,6 @@ public class BookingApiController implements BookingApi {
                     match.setId(updateBooking.getId());
                     bookingRepository.save(match);
                     log.info("Account updated");
-                }
-            }
-
-            for (ch.bzz.model.Booking dbBooking : dbBookings) {
-                boolean exists = updateBookings.stream()
-                        .anyMatch(api -> api.getId() == dbBooking.getId());
-
-                if (!exists) {
-                    bookingRepository.delete(dbBooking);
-                    log.info("Booking deleted: " + dbBooking.getId());
                 }
             }
 
