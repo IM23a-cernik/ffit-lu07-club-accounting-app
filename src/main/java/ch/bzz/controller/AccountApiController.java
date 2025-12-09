@@ -88,8 +88,7 @@ public class AccountApiController implements AccountApi {
                 ch.bzz.model.Account match = dbAccounts.stream()
                         .filter(account -> account.getAccountNumber() == updateAccount.getNumber())
                         .findFirst().orElse(null);
-
-                if (updateAccount.getName() == null) {
+                if (updateAccount.getName().orElse(null) == null) {
                     if (match != null) {
                         accountRepository.delete(match);
                         log.info("Account deleted: " + match.getAccountNumber());
